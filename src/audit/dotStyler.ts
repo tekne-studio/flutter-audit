@@ -87,7 +87,7 @@ export function styleDot(inputText: string, options: DotStylerOptions): string {
       output.push(`    fontcolor="${DEFAULT_NODE_TEXT}"`);
       output.push(`    fillcolor="${DEFAULT_NODE_FILL}"`);
       output.push(`    penwidth=2.0`);
-      output.push(`    margin="0.15,0.08"`);
+      output.push(`    margin="0.45,0.15"`);
       output.push(`  ];`);
       output.push(`  edge [`);
       output.push(`    color="${DEFAULT_EDGE_COLOR}"`);

@@ -53,6 +53,10 @@ A dark-themed interactive visualization:
 - **`/`** to search, **`Esc`** to clear
 - **Open in Editor** navigates directly to the file
 
+![Dependency graph overview with sidebar history](media/graph-overview.png)
+
+![Node detail panel with coupling metrics](media/node-detail.png)
+
 ### Layer Colors
 
 Nodes are colored by the architectural layer they belong to:

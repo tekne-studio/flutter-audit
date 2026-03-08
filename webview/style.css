@@ -10,7 +10,7 @@ body {
 #container:active { cursor: grabbing; }
 #container svg { width: 100%; height: 100%; }
 #container svg text {
-  font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', 'Cascadia Code', 'Consolas', monospace !important;
+  font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
 }
 
 /* Loading */
