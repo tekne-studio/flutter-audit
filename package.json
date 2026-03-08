@@ -28,7 +28,8 @@
     "visualization"
   ],
   "activationEvents": [
-    "workspaceContains:pubspec.yaml"
+    "workspaceContains:pubspec.yaml",
+    "workspaceContains:**/pubspec.yaml"
   ],
   "main": "./dist/extension.js",
   "icon": "resources/icon.png",
@@ -51,6 +52,11 @@
         "command": "flutterAudit.openFromHistory",
         "title": "Flutter Audit: Open Viewer from History",
         "icon": "$(open-preview)"
+      },
+      {
+        "command": "flutterAudit.runForProject",
+        "title": "Flutter Audit: Run Audit for Project",
+        "icon": "$(play)"
       }
     ],
     "keybindings": [],
@@ -72,7 +78,19 @@
       ]
     },
     "menus": {
+      "view/title": [
+        {
+          "command": "flutterAudit.run",
+          "when": "view == flutterAudit.history",
+          "group": "navigation"
+        }
+      ],
       "view/item/context": [
+        {
+          "command": "flutterAudit.runForProject",
+          "when": "view == flutterAudit.history && viewItem == dartProject",
+          "group": "inline"
+        },
         {
           "command": "flutterAudit.openFromHistory",
           "when": "view == flutterAudit.history && viewItem == auditWithGraph",

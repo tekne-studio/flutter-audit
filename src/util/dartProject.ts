@@ -3,8 +3,49 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { ExtensionConfig, LayerColors, LayerPatterns, SizeLimits } from '../types';
 
+export interface DartProject {
+  name: string;
+  root: string;
+}
+
+export function findDartProjects(): DartProject[] {
+  const folders = vscode.workspace.workspaceFolders;
+  if (!folders) return [];
+
+  const projects: DartProject[] = [];
+  const seen = new Set<string>();
+
+  for (const folder of folders) {
+    const folderPath = folder.uri.fsPath;
+
+    // Check workspace folder itself
+    if (isDartProject(folderPath) && !seen.has(folderPath)) {
+      seen.add(folderPath);
+      projects.push({ name: readProjectName(folderPath), root: folderPath });
+    }
+
+    // Check immediate subdirectories
+    try {
+      const entries = fs.readdirSync(folderPath, { withFileTypes: true });
+      for (const entry of entries) {
+        if (!entry.isDirectory() || entry.name.startsWith('.')) continue;
+        const candidate = path.join(folderPath, entry.name);
+        if (isDartProject(candidate) && !seen.has(candidate)) {
+          seen.add(candidate);
+          projects.push({ name: readProjectName(candidate), root: candidate });
+        }
+      }
+    } catch {
+      // ignore read errors
+    }
+  }
+
+  return projects;
+}
+
 export function getWorkspaceRoot(): string | undefined {
-  return vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+  const projects = findDartProjects();
+  return projects[0]?.root;
 }
 
 export function isDartProject(root: string): boolean {
