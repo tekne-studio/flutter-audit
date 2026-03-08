@@ -187,6 +187,7 @@ function loadAuditFromDisk(dirPath: string): AuditResult | null {
     timestamp: path.basename(dirPath),
     outputDir: dirPath,
     lakos,
+    classification: null,
     fileStats: { dartFiles: 0, generatedFiles: 0, totalSloc: 0, perDirectory: new Map() },
     sizeLimitViolations: [],
     importViolations: [],

@@ -101,31 +101,6 @@
     "configuration": {
       "title": "Flutter Audit",
       "properties": {
-        "flutterAudit.layerColors": {
-          "type": "object",
-          "default": {
-            "presentation": "#FF8800",
-            "application": "#CC00FF",
-            "domain": "#00D9FF",
-            "infrastructure": "#00FF88",
-            "core": "#888888",
-            "app": "#00D9FF",
-            "entry": "#CC00FF"
-          },
-          "description": "Colors for each architectural layer in the dependency graph"
-        },
-        "flutterAudit.layerPatterns": {
-          "type": "object",
-          "default": {
-            "presentation": "/presentation/",
-            "application": "/application/",
-            "domain": "/domain/",
-            "infrastructure": "/infrastructure/",
-            "core": "/core/",
-            "app": "/app/"
-          },
-          "description": "Directory patterns used to classify files into architectural layers"
-        },
         "flutterAudit.layoutEngine": {
           "type": "string",
           "default": "fdp",

@@ -1,12 +1,13 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
-import { AuditResult, LakosOutput, ExtensionConfig, FileStats, SizeLimitViolation, SizeLimits, ImportViolation } from '../types';
+import { AuditResult, LakosOutput, ExtensionConfig, ClassificationResult, FileStats, SizeLimitViolation, SizeLimits, ImportViolation } from '../types';
 import { spawnAsync } from '../util/process';
 import { readProjectName } from '../util/dartProject';
 import { styleDot } from './dotStyler';
 import { renderDotToSvg } from './renderer';
 import { collectFileStats, checkSizeLimits, checkImports } from './fileStats';
+import { classifyProject } from './layerClassifier';
 
 const LAKOS_IGNORE = '**.freezed.dart,**.g.dart,**.gr.dart';
 
@@ -69,17 +70,22 @@ export async function runAudit(
     progress.report({ message: 'lakos not found, skipping dependency graph...', increment: 25 });
   }
 
-  // Step 4: Style DOT + render SVG
+  // Step 4: Classify layers + Style DOT + render SVG
+  let classification: ClassificationResult | null = null;
   let styledDot: string | null = null;
   let svgContent: string | null = null;
 
-  if (rawDot) {
-    progress.report({ message: 'Styling graph...', increment: 10 });
+  if (rawDot && lakos) {
+    progress.report({ message: 'Classifying architectural layers...', increment: 5 });
+    throwIfCancelled(token);
+
+    classification = await classifyProject(lakos, libDir, config.generatedFilePatterns);
+
+    progress.report({ message: 'Styling graph...', increment: 5 });
     throwIfCancelled(token);
 
     styledDot = styleDot(rawDot, {
-      colors: config.layerColors,
-      patterns: config.layerPatterns,
+      classification,
       projectName,
     });
     fs.writeFileSync(path.join(outputDir, 'audit-graph-styled.dot'), styledDot);
@@ -148,6 +154,7 @@ export async function runAudit(
     timestamp,
     outputDir,
     lakos,
+    classification,
     fileStats,
     sizeLimitViolations,
     importViolations,

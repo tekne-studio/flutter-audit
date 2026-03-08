@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
-import { ExtensionConfig, LayerColors, LayerPatterns, SizeLimits } from '../types';
+import { ExtensionConfig, SizeLimits } from '../types';
 
 export interface DartProject {
   name: string;
@@ -79,23 +79,6 @@ export function getConfig(): ExtensionConfig {
   const config = vscode.workspace.getConfiguration('flutterAudit');
 
   return {
-    layerColors: config.get<LayerColors>('layerColors', {
-      presentation: '#FF8800',
-      application: '#CC00FF',
-      domain: '#00D9FF',
-      infrastructure: '#00FF88',
-      core: '#888888',
-      app: '#00D9FF',
-      entry: '#CC00FF',
-    }),
-    layerPatterns: config.get<LayerPatterns>('layerPatterns', {
-      presentation: '/presentation/',
-      application: '/application/',
-      domain: '/domain/',
-      infrastructure: '/infrastructure/',
-      core: '/core/',
-      app: '/app/',
-    }),
     layoutEngine: config.get<string>('layoutEngine', 'fdp'),
     sizeLimits: config.get<SizeLimits>('sizeLimits', {
       screens: 400,

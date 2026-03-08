@@ -68,6 +68,7 @@ export interface AuditResult {
   timestamp: string;
   outputDir: string;
   lakos: LakosOutput | null;
+  classification: ClassificationResult | null;
   fileStats: FileStats;
   sizeLimitViolations: SizeLimitViolation[];
   importViolations: ImportViolation[];
@@ -76,19 +77,27 @@ export interface AuditResult {
   styledDot: string | null;
 }
 
-export interface LayerColors {
-  presentation: string;
-  application: string;
-  domain: string;
-  infrastructure: string;
-  core: string;
-  app: string;
-  entry: string;
-  [key: string]: string;
+export interface LayerAssignment {
+  layer: string;
+  confidence: number;
+  source: 'directory' | 'content' | 'graph';
+  color: string;
 }
 
-export interface LayerPatterns {
-  [layer: string]: string;
+export interface ClassificationResult {
+  nodes: Record<string, LayerAssignment>;
+  clusters: Record<string, LayerAssignment>;
+  layers: Record<string, { color: string; nodeCount: number }>;
+}
+
+export interface DartFileSignals {
+  importsFlutterUI: boolean;
+  extendsWidget: boolean;
+  extendsStateManager: boolean;
+  hasAbstractClasses: boolean;
+  implementsDataAccess: boolean;
+  importsDataPackages: boolean;
+  hasMainFunction: boolean;
 }
 
 export interface SizeLimits {
@@ -98,8 +107,6 @@ export interface SizeLimits {
 }
 
 export interface ExtensionConfig {
-  layerColors: LayerColors;
-  layerPatterns: LayerPatterns;
   layoutEngine: string;
   sizeLimits: SizeLimits;
   outputDirectory: string;

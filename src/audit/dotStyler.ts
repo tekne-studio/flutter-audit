@@ -1,4 +1,4 @@
-import { LayerColors, LayerPatterns } from '../types';
+import { ClassificationResult } from '../types';
 
 const DEFAULT_NODE_FILL = '#1A1A1A';
 const DEFAULT_NODE_TEXT = '#E0E0E0';
@@ -7,22 +7,17 @@ const DEFAULT_CLUSTER_BG = '#0D0D0D';
 const DEFAULT_FONT = 'JetBrains Mono';
 
 export interface DotStylerOptions {
-  colors: LayerColors;
-  patterns: LayerPatterns;
+  classification: ClassificationResult;
   projectName: string;
   font?: string;
 }
 
-export function classifyNode(nodeId: string, patterns: LayerPatterns): string {
-  if (nodeId === '/main.dart') {
-    return 'entry';
+export function classifyNode(nodeId: string, classification: ClassificationResult): { layer: string; color: string } {
+  const assignment = classification.nodes[nodeId];
+  if (assignment) {
+    return { layer: assignment.layer, color: assignment.color };
   }
-  for (const [layer, pattern] of Object.entries(patterns)) {
-    if (nodeId.includes(pattern)) {
-      return layer;
-    }
-  }
-  return 'core';
+  return { layer: 'other', color: '#666666' };
 }
 
 function isGenerated(nodeId: string): boolean {
@@ -31,19 +26,13 @@ function isGenerated(nodeId: string): boolean {
     || nodeId.includes('.gr.dart');
 }
 
-function classifyCluster(clusterId: string, colors: LayerColors): string {
-  if (clusterId.includes('presentation')) { return colors.presentation; }
-  if (clusterId.includes('application')) { return colors.application; }
-  if (clusterId.includes('infrastructure')) { return colors.infrastructure; }
-  if (clusterId.includes('domain')) { return colors.domain; }
-  if (clusterId.includes('core')) { return colors.core; }
-  if (clusterId.includes('app')) { return colors.app; }
-  if (clusterId.includes('features')) { return '#444444'; }
-  return '#333333';
+function classifyCluster(clusterId: string, classification: ClassificationResult): string {
+  const assignment = classification.clusters[clusterId];
+  return assignment?.color ?? '#333333';
 }
 
 export function styleDot(inputText: string, options: DotStylerOptions): string {
-  const { colors, patterns, projectName } = options;
+  const { classification, projectName } = options;
   const font = options.font ?? DEFAULT_FONT;
   const lines = inputText.trim().split('\n');
   const output: string[] = [];
@@ -116,8 +105,7 @@ export function styleDot(inputText: string, options: DotStylerOptions): string {
       const dst = edgeMatch[2];
       if (generatedNodes.has(src) || generatedNodes.has(dst)) { continue; }
 
-      const cat = classifyNode(src.replace(/"/g, ''), patterns);
-      const edgeColor = colors[cat] ?? DEFAULT_EDGE_COLOR;
+      const { color: edgeColor } = classifyNode(src.replace(/"/g, ''), classification);
       output.push(`  ${src} -> ${dst} [color="${edgeColor}40"];`);
       continue;
     }
@@ -126,8 +114,7 @@ export function styleDot(inputText: string, options: DotStylerOptions): string {
     if (nodeMatch && !generatedNodes.has(nodeMatch[1])) {
       const nodeId = nodeMatch[1];
       const nodePath = nodeId.replace(/"/g, '');
-      const cat = classifyNode(nodePath, patterns);
-      const borderColor = colors[cat] ?? '#666666';
+      const { color: borderColor } = classifyNode(nodePath, classification);
 
       const labelMatch = stripped.match(/label="([^"]*)"/);
       const label = labelMatch?.[1] ?? nodePath.split('/').pop() ?? nodePath;
@@ -161,7 +148,7 @@ export function styleDot(inputText: string, options: DotStylerOptions): string {
           break;
         }
       }
-      const borderColor = classifyCluster(parentCluster, colors);
+      const borderColor = classifyCluster(parentCluster, classification);
       output.push(`    label="${labelText}\\n"`);
       output.push(`    fontname="${font}"`);
       output.push(`    fontsize=13`);

@@ -45,11 +45,7 @@ export function getViewerHtml(
 
 <div id="legend">
   <h4>Layers</h4>
-  <div class="legend-item"><div class="legend-swatch" style="background:#00D9FF"></div> domain / app</div>
-  <div class="legend-item"><div class="legend-swatch" style="background:#FF8800"></div> presentation</div>
-  <div class="legend-item"><div class="legend-swatch" style="background:#CC00FF"></div> application</div>
-  <div class="legend-item"><div class="legend-swatch" style="background:#00FF88"></div> infrastructure</div>
-  <div class="legend-item"><div class="legend-swatch" style="background:#888888"></div> core</div>
+  <div id="legend-items"></div>
 </div>
 
 <div id="info"></div>

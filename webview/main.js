@@ -6,26 +6,20 @@
 const vscode = acquireVsCodeApi();
 
 // ============================================
-// TEKNE COLORS
+// CLASSIFICATION (received from extension)
 // ============================================
-const COLORS = {
-  presentation: '#FF8800', application: '#CC00FF',
-  domain: '#00D9FF', infrastructure: '#00FF88',
-  core: '#888888', app: '#00D9FF', entry: '#CC00FF',
-};
+/** @type {any} */
+let classification = null;
 
 function classify(id) {
-  if (id === '/main.dart') return 'entry';
-  if (id.includes('/presentation/')) return 'presentation';
-  if (id.includes('/application/')) return 'application';
-  if (id.includes('/infrastructure/')) return 'infrastructure';
-  if (id.includes('/domain/')) return 'domain';
-  if (id.startsWith('/core/')) return 'core';
-  if (id.startsWith('/app/')) return 'app';
-  return 'core';
+  if (!classification || !classification.nodes[id]) return 'other';
+  return classification.nodes[id].layer;
 }
 
-function nodeColor(id) { return COLORS[classify(id)] || '#666'; }
+function nodeColor(id) {
+  if (!classification || !classification.nodes[id]) return '#666';
+  return classification.nodes[id].color;
+}
 
 // ============================================
 // STATE
@@ -62,6 +56,7 @@ let svg = null;
 window.addEventListener('message', (event) => {
   const message = event.data;
   if (message.command === 'loadAudit') {
+    classification = message.classification || null;
     loadAudit(message.svg, message.metrics, message.projectName);
   }
 });
@@ -133,6 +128,9 @@ function loadAudit(svgContent, metricsData, projectName) {
       `Click node to inspect \u00b7 Scroll to zoom`;
   }
 
+  // Update legend dynamically
+  updateLegend();
+
   // Init viewBox
   initViewBox();
 
@@ -200,6 +198,23 @@ function loadAudit(svgContent, metricsData, projectName) {
 
   // Initial fit
   setTimeout(zoomFit, 100);
+}
+
+// ============================================
+// LEGEND
+// ============================================
+function updateLegend() {
+  const legendItems = document.getElementById('legend-items');
+  if (!legendItems || !classification) return;
+
+  const sortedLayers = Object.entries(classification.layers)
+    .sort((a, b) => b[1].nodeCount - a[1].nodeCount);
+
+  let html = '';
+  for (const [name, info] of sortedLayers) {
+    html += `<div class="legend-item"><div class="legend-swatch" style="background:${info.color}"></div> ${name}</div>`;
+  }
+  legendItems.innerHTML = html;
 }
 
 // ============================================

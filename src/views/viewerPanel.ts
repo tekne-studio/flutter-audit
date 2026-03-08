@@ -65,6 +65,7 @@ export class ViewerPanel {
       command: 'loadAudit',
       svg: result.svgContent,
       metrics: result.lakos,
+      classification: result.classification,
       projectName: result.projectName,
       timestamp: result.timestamp,
       fileStats: {
