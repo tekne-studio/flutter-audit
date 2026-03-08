@@ -1,0 +1,152 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #0A0A0A;
+  color: #E0E0E0;
+  font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', monospace;
+  overflow: hidden;
+  height: 100vh;
+}
+#container { width: 100%; height: 100vh; cursor: grab; }
+#container:active { cursor: grabbing; }
+#container svg { width: 100%; height: 100%; }
+
+/* Loading */
+#loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  color: #555;
+  font-size: 14px;
+}
+
+/* Tooltip */
+#tooltip {
+  position: fixed;
+  display: none;
+  background: #1A1A1AEE;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 12px;
+  line-height: 1.7;
+  pointer-events: none;
+  z-index: 100;
+  max-width: 380px;
+  backdrop-filter: blur(8px);
+}
+#tooltip .tt-label { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+#tooltip .tt-path { color: #666; font-size: 10px; margin-bottom: 8px; }
+#tooltip .tt-row { display: flex; justify-content: space-between; gap: 20px; }
+#tooltip .tt-key { color: #888; }
+#tooltip .tt-val { font-weight: 600; }
+
+/* Panel */
+#panel {
+  position: fixed;
+  top: 0;
+  right: -400px;
+  width: 380px;
+  height: 100vh;
+  background: #111111F0;
+  border-left: 2px solid #333;
+  padding: 24px 20px;
+  overflow-y: auto;
+  transition: right 0.25s ease;
+  z-index: 90;
+  backdrop-filter: blur(12px);
+}
+#panel.open { right: 0; }
+#panel h2 { font-size: 16px; margin-bottom: 4px; word-break: break-all; }
+#panel .p-path { color: #666; font-size: 11px; margin-bottom: 16px; }
+#panel .p-section { margin-bottom: 16px; }
+#panel .p-section h3 {
+  font-size: 11px; color: #888; text-transform: uppercase;
+  letter-spacing: 1px; margin-bottom: 8px;
+}
+#panel .p-metric {
+  display: flex; justify-content: space-between;
+  padding: 4px 0; border-bottom: 1px solid #1A1A1A; font-size: 12px;
+}
+#panel .p-list { list-style: none; font-size: 11px; }
+#panel .p-list li {
+  padding: 4px 0; cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+}
+#panel .p-list li:hover { color: #fff; }
+#panel .p-list .dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+}
+#panel .p-close {
+  position: absolute; top: 16px; right: 16px;
+  background: none; border: 1px solid #444; color: #888;
+  width: 28px; height: 28px; border-radius: 4px;
+  cursor: pointer; font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+}
+#panel .p-close:hover { color: #fff; border-color: #666; }
+
+/* Controls */
+#controls {
+  position: fixed; bottom: 20px; left: 20px;
+  display: flex; gap: 8px; z-index: 80;
+}
+#controls button {
+  background: #1A1A1A; border: 1px solid #333; color: #888;
+  width: 36px; height: 36px; border-radius: 6px;
+  cursor: pointer; font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+}
+#controls button:hover { color: #fff; border-color: #666; }
+
+/* Legend */
+#legend {
+  position: fixed; bottom: 20px; right: 20px;
+  background: #1A1A1AEE; border: 1px solid #333;
+  border-radius: 8px; padding: 12px 16px; font-size: 11px;
+  z-index: 80; backdrop-filter: blur(8px);
+}
+#legend h4 {
+  font-size: 10px; color: #666; text-transform: uppercase;
+  letter-spacing: 1px; margin-bottom: 8px;
+}
+.legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.legend-swatch { width: 12px; height: 12px; border-radius: 3px; }
+
+/* Info */
+#info {
+  position: fixed; top: 16px; left: 16px;
+  font-size: 11px; color: #555; z-index: 80;
+}
+
+/* Search */
+#search-box {
+  position: fixed; top: 12px; left: 50%; transform: translateX(-50%);
+  z-index: 80;
+}
+#search-box input {
+  background: #1A1A1A; border: 1px solid #333; color: #E0E0E0;
+  padding: 8px 16px; border-radius: 6px; font-family: inherit;
+  font-size: 12px; width: 280px; outline: none;
+}
+#search-box input:focus { border-color: #00D9FF; }
+#search-box input::placeholder { color: #555; }
+
+/* Open in Editor button */
+.p-open-file {
+  width: 100%;
+  padding: 8px 12px;
+  background: #1A1A1A;
+  border: 1px solid #333;
+  color: #00D9FF;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 11px;
+  text-align: center;
+}
+.p-open-file:hover {
+  background: #222;
+  border-color: #00D9FF;
+  color: #fff;
+}

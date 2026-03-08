@@ -1,0 +1,157 @@
+{
+  "name": "flutter-audit",
+  "displayName": "Flutter Audit",
+  "description": "Interactive dependency graph visualization and architecture audit for Flutter/Dart projects",
+  "version": "0.1.0",
+  "publisher": "tekne-studio",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tekne-studio/flutter-audit"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Visualization",
+    "Linters",
+    "Other"
+  ],
+  "keywords": [
+    "flutter",
+    "dart",
+    "dependency-graph",
+    "architecture",
+    "audit",
+    "clean-architecture",
+    "lakos",
+    "visualization"
+  ],
+  "activationEvents": [
+    "workspaceContains:pubspec.yaml"
+  ],
+  "main": "./dist/extension.js",
+  "icon": "resources/icon.png",
+  "contributes": {
+    "commands": [
+      {
+        "command": "flutterAudit.run",
+        "title": "Flutter Audit: Run Audit",
+        "icon": "$(graph)"
+      },
+      {
+        "command": "flutterAudit.openViewer",
+        "title": "Flutter Audit: Open Viewer"
+      },
+      {
+        "command": "flutterAudit.showHistory",
+        "title": "Flutter Audit: Show History"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "flutterAudit.run",
+        "key": "ctrl+shift+a",
+        "mac": "cmd+shift+a",
+        "when": "workspaceFolderCount > 0"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "flutterAudit",
+          "title": "Flutter Audit",
+          "icon": "$(graph)"
+        }
+      ]
+    },
+    "views": {
+      "flutterAudit": [
+        {
+          "id": "flutterAudit.history",
+          "name": "Audit History"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Flutter Audit",
+      "properties": {
+        "flutterAudit.layerColors": {
+          "type": "object",
+          "default": {
+            "presentation": "#FF8800",
+            "application": "#CC00FF",
+            "domain": "#00D9FF",
+            "infrastructure": "#00FF88",
+            "core": "#888888",
+            "app": "#00D9FF",
+            "entry": "#CC00FF"
+          },
+          "description": "Colors for each architectural layer in the dependency graph"
+        },
+        "flutterAudit.layerPatterns": {
+          "type": "object",
+          "default": {
+            "presentation": "/presentation/",
+            "application": "/application/",
+            "domain": "/domain/",
+            "infrastructure": "/infrastructure/",
+            "core": "/core/",
+            "app": "/app/"
+          },
+          "description": "Directory patterns used to classify files into architectural layers"
+        },
+        "flutterAudit.layoutEngine": {
+          "type": "string",
+          "default": "fdp",
+          "enum": ["fdp", "dot", "neato", "circo", "twopi", "sfdp"],
+          "description": "Graphviz layout engine for the dependency graph"
+        },
+        "flutterAudit.sizeLimits": {
+          "type": "object",
+          "default": {
+            "screens": 400,
+            "widgets": 300,
+            "services": 350
+          },
+          "description": "Maximum line count limits per file type"
+        },
+        "flutterAudit.outputDirectory": {
+          "type": "string",
+          "default": "audit",
+          "description": "Directory for audit output (relative to workspace root)"
+        },
+        "flutterAudit.generatedFilePatterns": {
+          "type": "array",
+          "default": [
+            "**.freezed.dart",
+            "**.g.dart",
+            "**.gr.dart"
+          ],
+          "description": "Glob patterns for generated files to exclude from the graph"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "node esbuild.js --production",
+    "watch": "node esbuild.js --watch",
+    "lint": "eslint src",
+    "test": "node --import tsx --test test/**/*.test.ts",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "esbuild": "^0.20.0",
+    "eslint": "^8.56.0",
+    "typescript": "^5.3.0",
+    "@vscode/vsce": "^2.22.0"
+  },
+  "dependencies": {
+    "@hpcc-js/wasm-graphviz": "^1.6.1"
+  }
+}
