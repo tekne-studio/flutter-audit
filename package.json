@@ -156,7 +156,11 @@
     "esbuild": "^0.20.0",
     "eslint": "^8.56.0",
     "typescript": "^5.3.0",
-    "@vscode/vsce": "^2.22.0"
+    "@vscode/vsce": "^2.22.0",
+    "semantic-release": "^24.0.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "semantic-release-vsce": "^5.7.0"
   },
   "dependencies": {
     "@hpcc-js/wasm-graphviz": "^1.6.1"

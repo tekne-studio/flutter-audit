@@ -9,3 +9,8 @@ esbuild.js
 **/*.ts
 **/*.map
 PLAN.md
+.github/**
+release.config.mjs
+bun.lock
+.claude/**
+.eslintrc.json
