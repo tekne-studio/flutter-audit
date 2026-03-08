@@ -2,7 +2,7 @@
   "name": "flutter-audit",
   "displayName": "Flutter Audit",
   "description": "Interactive dependency graph visualization and architecture audit for Flutter/Dart projects",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "publisher": "TekneStudio",
   "license": "MIT",
   "repository": {
@@ -111,7 +111,14 @@
         "flutterAudit.layoutEngine": {
           "type": "string",
           "default": "fdp",
-          "enum": ["fdp", "dot", "neato", "circo", "twopi", "sfdp"],
+          "enum": [
+            "fdp",
+            "dot",
+            "neato",
+            "circo",
+            "twopi",
+            "sfdp"
+          ],
           "description": "Graphviz layout engine for the dependency graph"
         },
         "flutterAudit.sizeLimits": {
