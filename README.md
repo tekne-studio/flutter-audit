@@ -121,22 +121,9 @@ lib/
 
 The layer patterns are fully configurable — adapt them to your project structure.
 
-## Development
+## Contributing
 
-```bash
-git clone https://github.com/tekne-studio/flutter-audit.git
-cd flutter-audit
-npm install
-npm run watch    # Compile + watch for changes
-# Press F5 in VS Code to launch Extension Development Host
-```
-
-### Building
-
-```bash
-npm run compile          # Production build
-npx @vscode/vsce package # Create .vsix package
-```
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for setup instructions, project structure, and guidelines.
 
 ## License
 
