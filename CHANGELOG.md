@@ -1,3 +1,10 @@
+# [0.3.0](https://github.com/tekne-studio/flutter-audit/compare/v0.2.0...v0.3.0) (2026-03-08)
+
+
+### Features
+
+* add monorepo support with multi-project detection ([e4cde06](https://github.com/tekne-studio/flutter-audit/commit/e4cde062d2ab12b14039b27f867918c476ddb11b))
+
 # [0.2.0](https://github.com/tekne-studio/flutter-audit/compare/v0.1.0...v0.2.0) (2026-03-08)
 
 
