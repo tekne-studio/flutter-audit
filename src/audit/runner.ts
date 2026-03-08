@@ -29,7 +29,7 @@ export async function runAudit(
 
   // Step 1: Verify lakos
   progress.report({ message: 'Checking lakos...', increment: 5 });
-  const hasLakos = await checkLakos(workspaceRoot);
+  const hasLakos = checkLakos(workspaceRoot);
 
   // Step 2: File stats
   progress.report({ message: 'Counting files and lines...', increment: 10 });
@@ -157,10 +157,10 @@ export async function runAudit(
   };
 }
 
-async function checkLakos(cwd: string): Promise<boolean> {
+function checkLakos(cwd: string): boolean {
   try {
-    const result = await spawnAsync('dart', ['run', 'lakos', '--version'], cwd);
-    return result.exitCode === 0;
+    const pubspec = fs.readFileSync(path.join(cwd, 'pubspec.yaml'), 'utf-8');
+    return /^\s+lakos:/m.test(pubspec);
   } catch {
     return false;
   }
