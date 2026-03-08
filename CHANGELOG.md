@@ -1,3 +1,17 @@
+# [0.4.0](https://github.com/tekne-studio/flutter-audit/compare/v0.3.2...v0.4.0) (2026-03-08)
+
+
+### Bug Fixes
+
+* auto-continue graph generation after lakos install and accept non-zero exit codes ([67b0fd6](https://github.com/tekne-studio/flutter-audit/commit/67b0fd610cd4441499ff7b4b0f7cc86c6b4bc365))
+* improve lakos error logging with combined stdout+stderr ([ea369b3](https://github.com/tekne-studio/flutter-audit/commit/ea369b31a9cd32893208c82a3310ace216dcc982))
+
+
+### Features
+
+* add output channel logging and auto-install lakos prompt ([6d0618f](https://github.com/tekne-studio/flutter-audit/commit/6d0618f1122cc899a6c48b9f3d2624ac47587359))
+* replace hardcoded layer patterns with automatic detection ([5d7bf9d](https://github.com/tekne-studio/flutter-audit/commit/5d7bf9d3c5894981f2e5d8d2b269eea6ab208789))
+
 ## [0.3.2](https://github.com/tekne-studio/flutter-audit/compare/v0.3.1...v0.3.2) (2026-03-08)
 
 
