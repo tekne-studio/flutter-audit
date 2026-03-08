@@ -20,10 +20,11 @@ src/
 ├── extension.ts          # Entry point, command registration
 ├── types.ts              # Shared type definitions
 ├── audit/
-│   ├── runner.ts         # Orchestrates the full audit pipeline
-│   ├── fileStats.ts      # File counting, SLOC analysis
-│   ├── dotStyler.ts      # Adds layer colors to DOT graph
-│   └── renderer.ts       # Graphviz WASM rendering (DOT → SVG)
+│   ├── runner.ts          # Orchestrates the full audit pipeline
+│   ├── layerClassifier.ts # Auto-detects architectural layers (3 strategies)
+│   ├── fileStats.ts       # File counting, SLOC analysis
+│   ├── dotStyler.ts       # Adds layer colors to DOT graph
+│   └── renderer.ts        # Graphviz WASM rendering (DOT → SVG)
 ├── views/
 │   ├── viewerPanel.ts    # WebView panel for the interactive graph
 │   ├── viewerHtml.ts     # HTML template for the viewer

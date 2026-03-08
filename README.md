@@ -34,12 +34,8 @@ Flutter Audit makes these problems **visible and measurable** — every time you
 ## Quick Start
 
 1. Install from the VS Code Marketplace
-2. Add [lakos](https://pub.dev/packages/lakos) to your project:
-   ```yaml
-   dev_dependencies:
-     lakos: ^2.0.6
-   ```
-3. Open the command palette and run **Flutter Audit: Run Audit**
+2. Open the command palette and run **Flutter Audit: Run Audit**
+3. If [lakos](https://pub.dev/packages/lakos) isn't installed, the extension will offer to add it automatically
 4. Explore the interactive graph
 
 The extension also works without lakos — you still get file stats, size limit checks, import analysis, and `dart analyze` results. Lakos adds the dependency graph and coupling metrics.
@@ -57,19 +53,15 @@ A dark-themed interactive visualization:
 
 ![Node detail panel with coupling metrics](media/node-detail.png)
 
-### Layer Colors
+### Automatic Layer Detection
 
-Nodes are colored by the architectural layer they belong to:
+Nodes are automatically colored by architectural layer — no configuration needed. The classifier combines three strategies to work with any project structure:
 
-| Layer | Color | Default Pattern |
-|---|---|---|
-| Presentation | Orange | `/presentation/` |
-| Application | Purple | `/application/` |
-| Domain | Cyan | `/domain/` |
-| Infrastructure | Green | `/infrastructure/` |
-| Core | Grey | `/core/` |
+- **Directory analysis** — groups files by their directory path (e.g., `models/`, `screens/`, `services/`)
+- **Content analysis** — reads file headers to detect Flutter UI imports, state managers, data access patterns, and abstract contracts
+- **Graph inference** — uses coupling metrics (instability, in-degree, out-degree) to identify stable foundations vs. volatile entry points
 
-Patterns are fully configurable — adapt them to your project structure.
+Each directory becomes a cluster, with subdirectories rendered as nested clusters. Colors are assigned automatically based on layer size.
 
 ## Configuration
 
@@ -77,8 +69,6 @@ All settings live under `flutterAudit.*` in VS Code settings:
 
 | Setting | Default | Description |
 |---|---|---|
-| `layerColors` | *(see above)* | Colors per architectural layer |
-| `layerPatterns` | *(see above)* | Directory patterns for layer classification |
 | `layoutEngine` | `fdp` | Graphviz engine (`fdp`, `dot`, `neato`, `circo`, `sfdp`) |
 | `sizeLimits` | `{screens: 400, widgets: 300, services: 350}` | Max lines per file type |
 | `outputDirectory` | `audit` | Where audit artifacts are saved |
