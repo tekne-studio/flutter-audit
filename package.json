@@ -46,16 +46,14 @@
       {
         "command": "flutterAudit.showHistory",
         "title": "Flutter Audit: Show History"
-      }
-    ],
-    "keybindings": [
+      },
       {
-        "command": "flutterAudit.run",
-        "key": "ctrl+shift+a",
-        "mac": "cmd+shift+a",
-        "when": "workspaceFolderCount > 0"
+        "command": "flutterAudit.openFromHistory",
+        "title": "Flutter Audit: Open Viewer from History",
+        "icon": "$(open-preview)"
       }
     ],
+    "keybindings": [],
     "viewsContainers": {
       "activitybar": [
         {
@@ -70,6 +68,15 @@
         {
           "id": "flutterAudit.history",
           "name": "Audit History"
+        }
+      ]
+    },
+    "menus": {
+      "view/item/context": [
+        {
+          "command": "flutterAudit.openFromHistory",
+          "when": "view == flutterAudit.history && viewItem == auditWithGraph",
+          "group": "inline"
         }
       ]
     },

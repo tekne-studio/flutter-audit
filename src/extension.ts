@@ -1,8 +1,10 @@
 import * as vscode from 'vscode';
+import * as fs from 'fs';
+import * as path from 'path';
 import { getWorkspaceRoot, isDartProject, getConfig } from './util/dartProject';
 import { runAudit } from './audit/runner';
 import { ViewerPanel } from './views/viewerPanel';
-import { AuditHistoryProvider } from './views/historyProvider';
+import { AuditHistoryProvider, AuditHistoryItem } from './views/historyProvider';
 import { createStatusBarItem, showStatusBarProgress, resetStatusBar } from './views/statusBar';
 import { AuditResult } from './types';
 
@@ -103,6 +105,26 @@ export function activate(context: vscode.ExtensionContext) {
     }),
   );
 
+  // Command: Open Viewer from History
+  context.subscriptions.push(
+    vscode.commands.registerCommand('flutterAudit.openFromHistory', (item: AuditHistoryItem) => {
+      const workspaceRoot = getWorkspaceRoot();
+      if (!workspaceRoot) {
+        vscode.window.showErrorMessage('No workspace folder open.');
+        return;
+      }
+
+      const result = loadAuditFromDisk(item.dirPath);
+      if (!result) {
+        vscode.window.showWarningMessage('Could not load audit data from this directory.');
+        return;
+      }
+
+      const panel = ViewerPanel.createOrShow(context.extensionUri, workspaceRoot);
+      panel.sendAuditData(result);
+    }),
+  );
+
   // Command: Show History
   context.subscriptions.push(
     vscode.commands.registerCommand('flutterAudit.showHistory', () => {
@@ -125,3 +147,28 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 export function deactivate() {}
+
+function loadAuditFromDisk(dirPath: string): AuditResult | null {
+  const svgPath = path.join(dirPath, 'audit-graph.svg');
+  const jsonPath = path.join(dirPath, 'audit-deps.json');
+
+  if (!fs.existsSync(svgPath)) { return null; }
+
+  const svgContent = fs.readFileSync(svgPath, 'utf-8');
+  const lakos = fs.existsSync(jsonPath)
+    ? JSON.parse(fs.readFileSync(jsonPath, 'utf-8'))
+    : null;
+
+  return {
+    projectName: '',
+    timestamp: path.basename(dirPath),
+    outputDir: dirPath,
+    lakos,
+    fileStats: { dartFiles: 0, generatedFiles: 0, totalSloc: 0, perDirectory: new Map() },
+    sizeLimitViolations: [],
+    importViolations: [],
+    analyzeOutput: '',
+    svgContent,
+    styledDot: null,
+  };
+}

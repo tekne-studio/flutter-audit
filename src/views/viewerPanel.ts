@@ -36,7 +36,7 @@ export class ViewerPanel {
     extensionUri: vscode.Uri,
     workspaceRoot: string,
   ): ViewerPanel {
-    const column = vscode.ViewColumn.Beside;
+    const column = vscode.ViewColumn.One;
 
     if (ViewerPanel.currentPanel) {
       ViewerPanel.currentPanel.panel.reveal(column);
