@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
-import { findDartProjects, getConfig, DartProject } from './util/dartProject';
+import { findDartProjects, getConfig } from './util/dartProject';
 import { runAudit } from './audit/runner';
 import { ViewerPanel } from './views/viewerPanel';
 import { AuditHistoryProvider, AuditHistoryItem } from './views/historyProvider';
@@ -9,10 +9,15 @@ import { createStatusBarItem, showStatusBarProgress, resetStatusBar } from './vi
 import { AuditResult } from './types';
 
 let lastAuditResult: AuditResult | undefined;
+let outputChannel: vscode.OutputChannel;
 
 export function activate(context: vscode.ExtensionContext) {
   const config = getConfig();
   const projects = findDartProjects();
+
+  // Output channel for audit logs
+  outputChannel = vscode.window.createOutputChannel('Flutter Audit');
+  context.subscriptions.push(outputChannel);
 
   // Status bar
   const statusBarItem = createStatusBarItem();
@@ -32,6 +37,10 @@ export function activate(context: vscode.ExtensionContext) {
   async function executeAudit(projectRoot: string) {
     const currentConfig = getConfig();
     showStatusBarProgress(statusBarItem);
+    outputChannel.clear();
+    outputChannel.show(true);
+    outputChannel.appendLine(`[Flutter Audit] Starting audit for: ${projectRoot}`);
+    outputChannel.appendLine(`[Flutter Audit] Timestamp: ${new Date().toISOString()}`);
 
     try {
       lastAuditResult = await vscode.window.withProgress(
@@ -41,7 +50,7 @@ export function activate(context: vscode.ExtensionContext) {
           cancellable: true,
         },
         async (progress, token) => {
-          return runAudit(projectRoot, currentConfig, progress, token);
+          return runAudit(projectRoot, currentConfig, progress, token, outputChannel);
         },
       );
 

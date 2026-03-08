@@ -15,11 +15,18 @@ interface ProgressReporter {
   report(value: { message?: string; increment?: number }): void;
 }
 
+interface Logger {
+  appendLine(value: string): void;
+}
+
+const noopLogger: Logger = { appendLine: () => {} };
+
 export async function runAudit(
   workspaceRoot: string,
   config: ExtensionConfig,
   progress: ProgressReporter,
   token: vscode.CancellationToken,
+  log: Logger = noopLogger,
 ): Promise<AuditResult> {
   const libDir = path.join(workspaceRoot, 'lib');
   const projectName = readProjectName(workspaceRoot);
@@ -27,16 +34,19 @@ export async function runAudit(
   const outputDir = path.join(workspaceRoot, config.outputDirectory, timestamp);
 
   fs.mkdirSync(outputDir, { recursive: true });
+  log.appendLine(`[Step 0] Output directory: ${outputDir}`);
 
   // Step 1: Verify lakos
   progress.report({ message: 'Checking lakos...', increment: 5 });
   const hasLakos = checkLakos(workspaceRoot);
+  log.appendLine(`[Step 1] lakos found in pubspec.yaml: ${hasLakos}`);
 
   // Step 2: File stats
   progress.report({ message: 'Counting files and lines...', increment: 10 });
   throwIfCancelled(token);
   const fileStats = collectFileStats(libDir, config.generatedFilePatterns);
   writeFileStats(outputDir, fileStats);
+  log.appendLine(`[Step 2] File stats: ${fileStats.dartFiles} dart files, ${fileStats.generatedFiles} generated, ${fileStats.totalSloc} SLOC`);
 
   // Step 3: Lakos DOT + JSON
   let lakos: LakosOutput | null = null;
@@ -46,28 +56,62 @@ export async function runAudit(
     progress.report({ message: 'Generating dependency graph...', increment: 15 });
     throwIfCancelled(token);
 
+    log.appendLine(`[Step 3] Running: dart run lakos -f dot -m -i "${LAKOS_IGNORE}" lib/`);
     const dotResult = await spawnAsync(
       'dart', ['run', 'lakos', '-f', 'dot', '-m', '-i', LAKOS_IGNORE, 'lib/'],
       workspaceRoot, token,
     );
+    log.appendLine(`[Step 3] lakos DOT exit code: ${dotResult.exitCode}`);
+    if (dotResult.stderr.trim()) {
+      log.appendLine(`[Step 3] lakos DOT stderr: ${dotResult.stderr.trim()}`);
+    }
     if (dotResult.exitCode === 0 && dotResult.stdout.trim()) {
       rawDot = dotResult.stdout;
       fs.writeFileSync(path.join(outputDir, 'audit-graph.dot'), rawDot);
+      log.appendLine(`[Step 3] DOT output saved (${rawDot.length} chars)`);
+    } else {
+      log.appendLine(`[Step 3] DOT output empty or failed`);
     }
 
     progress.report({ message: 'Collecting metrics...', increment: 10 });
     throwIfCancelled(token);
 
+    log.appendLine(`[Step 3] Running: dart run lakos -f json -m --node-metrics -i "${LAKOS_IGNORE}" lib/`);
     const jsonResult = await spawnAsync(
       'dart', ['run', 'lakos', '-f', 'json', '-m', '--node-metrics', '-i', LAKOS_IGNORE, 'lib/'],
       workspaceRoot, token,
     );
+    log.appendLine(`[Step 3] lakos JSON exit code: ${jsonResult.exitCode}`);
+    if (jsonResult.stderr.trim()) {
+      log.appendLine(`[Step 3] lakos JSON stderr: ${jsonResult.stderr.trim()}`);
+    }
     if (jsonResult.exitCode === 0 && jsonResult.stdout.trim()) {
       lakos = JSON.parse(jsonResult.stdout) as LakosOutput;
       fs.writeFileSync(path.join(outputDir, 'audit-deps.json'), jsonResult.stdout);
+      log.appendLine(`[Step 3] JSON parsed: ${Object.keys(lakos.nodes).length} nodes, ${lakos.edges.length} edges`);
+    } else {
+      log.appendLine(`[Step 3] JSON output empty or failed`);
     }
   } else {
     progress.report({ message: 'lakos not found, skipping dependency graph...', increment: 25 });
+    log.appendLine(`[Step 3] SKIPPED — lakos not in dev_dependencies`);
+
+    const action = await vscode.window.showWarningMessage(
+      'lakos is not installed. The dependency graph requires lakos. Add it now?',
+      'Add lakos',
+      'Skip',
+    );
+    if (action === 'Add lakos') {
+      log.appendLine(`[Step 3] Installing lakos...`);
+      const addResult = await spawnAsync('dart', ['pub', 'add', '--dev', 'lakos'], workspaceRoot, token);
+      if (addResult.exitCode === 0) {
+        log.appendLine(`[Step 3] lakos installed successfully. Re-run the audit to generate the graph.`);
+        vscode.window.showInformationMessage('lakos added to dev_dependencies. Re-run the audit to generate the dependency graph.');
+      } else {
+        log.appendLine(`[Step 3] Failed to install lakos: ${addResult.stderr}`);
+        vscode.window.showErrorMessage(`Failed to add lakos: ${addResult.stderr}`);
+      }
+    }
   }
 
   // Step 4: Classify layers + Style DOT + render SVG
@@ -80,6 +124,8 @@ export async function runAudit(
     throwIfCancelled(token);
 
     classification = await classifyProject(lakos, libDir, config.generatedFilePatterns);
+    const layerNames = Object.keys(classification.layers);
+    log.appendLine(`[Step 4] Classification complete: ${layerNames.length} layers detected [${layerNames.join(', ')}]`);
 
     progress.report({ message: 'Styling graph...', increment: 5 });
     throwIfCancelled(token);
@@ -89,6 +135,7 @@ export async function runAudit(
       projectName,
     });
     fs.writeFileSync(path.join(outputDir, 'audit-graph-styled.dot'), styledDot);
+    log.appendLine(`[Step 4] Styled DOT saved (${styledDot.length} chars)`);
 
     progress.report({ message: 'Rendering SVG (WASM)...', increment: 15 });
     throwIfCancelled(token);
@@ -96,10 +143,14 @@ export async function runAudit(
     try {
       svgContent = await renderDotToSvg(styledDot, config.layoutEngine);
       fs.writeFileSync(path.join(outputDir, 'audit-graph.svg'), svgContent);
+      log.appendLine(`[Step 4] SVG rendered (${svgContent.length} chars, engine: ${config.layoutEngine})`);
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
+      log.appendLine(`[Step 4] SVG rendering FAILED: ${msg}`);
       vscode.window.showWarningMessage(`SVG rendering failed: ${msg}`);
     }
+  } else {
+    log.appendLine(`[Step 4] SKIPPED — no DOT/JSON data available`);
   }
 
   // Step 5: Circular dependencies
@@ -117,6 +168,7 @@ export async function runAudit(
       path.join(outputDir, 'audit-circular.txt'),
       hasCycles ? circularOutput : 'No circular dependencies found.',
     );
+    log.appendLine(`[Step 5] Circular dependencies: ${hasCycles ? 'FOUND' : 'none'}`);
   }
 
   // Step 6: Dart analyze
@@ -126,6 +178,7 @@ export async function runAudit(
   const analyzeResult = await spawnAsync('dart', ['analyze', 'lib/'], workspaceRoot, token);
   const analyzeOutput = analyzeResult.stdout + analyzeResult.stderr;
   fs.writeFileSync(path.join(outputDir, 'audit-analyze.txt'), analyzeOutput);
+  log.appendLine(`[Step 6] dart analyze exit code: ${analyzeResult.exitCode}`);
 
   // Step 7: Size limits
   progress.report({ message: 'Checking file size limits...', increment: 5 });
@@ -133,6 +186,7 @@ export async function runAudit(
 
   const sizeLimitViolations = checkSizeLimits(libDir, config.generatedFilePatterns, config.sizeLimits);
   writeSizeLimits(outputDir, sizeLimitViolations, config.sizeLimits);
+  log.appendLine(`[Step 7] Size limit violations: ${sizeLimitViolations.length}`);
 
   // Step 8: Import check
   progress.report({ message: 'Checking import conventions...', increment: 5 });
@@ -140,6 +194,7 @@ export async function runAudit(
 
   const importViolations = checkImports(libDir, config.generatedFilePatterns);
   writeImportCheck(outputDir, importViolations);
+  log.appendLine(`[Step 8] Import violations: ${importViolations.length}`);
 
   // Step 9: Summary
   progress.report({ message: 'Writing summary...', increment: 5 });
@@ -147,6 +202,7 @@ export async function runAudit(
     writeSummary(outputDir, lakos);
   }
 
+  log.appendLine(`[Done] Audit complete. Output: ${outputDir}`);
   progress.report({ message: 'Audit complete!', increment: 5 });
 
   return {
