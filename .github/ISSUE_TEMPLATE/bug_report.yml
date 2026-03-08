@@ -1,0 +1,54 @@
+name: Bug Report
+description: Report a bug or unexpected behavior
+labels: ["bug"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What happened? What did you expect?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: Minimal steps to reproduce the issue
+      placeholder: |
+        1. Open a Flutter project with `pubspec.yaml`
+        2. Run `Flutter Audit: Run Audit`
+        3. ...
+    validations:
+      required: true
+
+  - type: input
+    id: vscode-version
+    attributes:
+      label: VS Code Version
+      placeholder: "e.g. 1.96.0"
+    validations:
+      required: true
+
+  - type: input
+    id: extension-version
+    attributes:
+      label: Flutter Audit Version
+      placeholder: "e.g. 0.2.0"
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: Operating System
+      placeholder: "e.g. macOS 15.2, Ubuntu 24.04, Windows 11"
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant Logs
+      description: Paste any error output from the Output panel (Flutter Audit channel)
+      render: text
