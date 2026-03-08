@@ -51,8 +51,31 @@ export async function runAudit(
   // Step 3: Lakos DOT + JSON
   let lakos: LakosOutput | null = null;
   let rawDot: string | null = null;
+  let lakosAvailable = hasLakos;
 
-  if (hasLakos) {
+  if (!lakosAvailable) {
+    progress.report({ message: 'lakos not found...', increment: 5 });
+    log.appendLine(`[Step 3] lakos not in dev_dependencies`);
+
+    const action = await vscode.window.showWarningMessage(
+      'lakos is not installed. The dependency graph requires lakos. Add it now?',
+      'Add lakos',
+      'Skip',
+    );
+    if (action === 'Add lakos') {
+      log.appendLine(`[Step 3] Installing lakos...`);
+      const addResult = await spawnAsync('dart', ['pub', 'add', '--dev', 'lakos'], workspaceRoot, token);
+      if (addResult.exitCode === 0) {
+        log.appendLine(`[Step 3] lakos installed successfully. Continuing with graph generation...`);
+        lakosAvailable = true;
+      } else {
+        log.appendLine(`[Step 3] Failed to install lakos: ${addResult.stderr}`);
+        vscode.window.showErrorMessage(`Failed to add lakos: ${addResult.stderr}`);
+      }
+    }
+  }
+
+  if (lakosAvailable) {
     progress.report({ message: 'Generating dependency graph...', increment: 15 });
     throwIfCancelled(token);
 
@@ -62,10 +85,13 @@ export async function runAudit(
       workspaceRoot, token,
     );
     log.appendLine(`[Step 3] lakos DOT exit code: ${dotResult.exitCode}`);
-    if (dotResult.exitCode === 0 && dotResult.stdout.trim()) {
+    if (dotResult.stdout.includes('digraph')) {
       rawDot = dotResult.stdout;
       fs.writeFileSync(path.join(outputDir, 'audit-graph.dot'), rawDot);
       log.appendLine(`[Step 3] DOT output saved (${rawDot.length} chars)`);
+      if (dotResult.exitCode !== 0) {
+        log.appendLine(`[Step 3] lakos exited with ${dotResult.exitCode} (likely cycles detected — output is still valid)`);
+      }
     } else {
       const allOutput = (dotResult.stdout + dotResult.stderr).trim();
       log.appendLine(`[Step 3] lakos DOT FAILED (exit ${dotResult.exitCode})`);
@@ -84,10 +110,13 @@ export async function runAudit(
       workspaceRoot, token,
     );
     log.appendLine(`[Step 3] lakos JSON exit code: ${jsonResult.exitCode}`);
-    if (jsonResult.exitCode === 0 && jsonResult.stdout.trim()) {
+    if (jsonResult.stdout.includes('"nodes"')) {
       lakos = JSON.parse(jsonResult.stdout) as LakosOutput;
       fs.writeFileSync(path.join(outputDir, 'audit-deps.json'), jsonResult.stdout);
       log.appendLine(`[Step 3] JSON parsed: ${Object.keys(lakos.nodes).length} nodes, ${lakos.edges.length} edges`);
+      if (jsonResult.exitCode !== 0) {
+        log.appendLine(`[Step 3] lakos exited with ${jsonResult.exitCode} (likely cycles detected — output is still valid)`);
+      }
     } else {
       const allOutput = (jsonResult.stdout + jsonResult.stderr).trim();
       log.appendLine(`[Step 3] lakos JSON FAILED (exit ${jsonResult.exitCode})`);
@@ -96,25 +125,8 @@ export async function runAudit(
       }
     }
   } else {
-    progress.report({ message: 'lakos not found, skipping dependency graph...', increment: 25 });
-    log.appendLine(`[Step 3] SKIPPED — lakos not in dev_dependencies`);
-
-    const action = await vscode.window.showWarningMessage(
-      'lakos is not installed. The dependency graph requires lakos. Add it now?',
-      'Add lakos',
-      'Skip',
-    );
-    if (action === 'Add lakos') {
-      log.appendLine(`[Step 3] Installing lakos...`);
-      const addResult = await spawnAsync('dart', ['pub', 'add', '--dev', 'lakos'], workspaceRoot, token);
-      if (addResult.exitCode === 0) {
-        log.appendLine(`[Step 3] lakos installed successfully. Re-run the audit to generate the graph.`);
-        vscode.window.showInformationMessage('lakos added to dev_dependencies. Re-run the audit to generate the dependency graph.');
-      } else {
-        log.appendLine(`[Step 3] Failed to install lakos: ${addResult.stderr}`);
-        vscode.window.showErrorMessage(`Failed to add lakos: ${addResult.stderr}`);
-      }
-    }
+    progress.report({ message: 'Skipping dependency graph...', increment: 20 });
+    log.appendLine(`[Step 3] SKIPPED — lakos not available`);
   }
 
   // Step 4: Classify layers + Style DOT + render SVG
@@ -157,7 +169,7 @@ export async function runAudit(
   }
 
   // Step 5: Circular dependencies
-  if (hasLakos) {
+  if (lakosAvailable) {
     progress.report({ message: 'Checking circular dependencies...', increment: 5 });
     throwIfCancelled(token);
 
