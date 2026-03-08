@@ -27,10 +27,10 @@ src/
 ├── views/
 │   ├── viewerPanel.ts    # WebView panel for the interactive graph
 │   ├── viewerHtml.ts     # HTML template for the viewer
-│   ├── historyProvider.ts # Sidebar tree view for audit history
+│   ├── historyProvider.ts # Sidebar tree view (Project > Timestamp > Files)
 │   └── statusBar.ts      # Status bar integration
 ├── util/
-│   ├── dartProject.ts    # Dart/Flutter project detection
+│   ├── dartProject.ts    # Multi-project detection (DartProject, findDartProjects)
 │   └── process.ts        # Child process helpers
 webview/
 ├── main.js               # Interactive graph (runs in WebView)
