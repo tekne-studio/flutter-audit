@@ -1,3 +1,10 @@
+## [0.3.1](https://github.com/tekne-studio/flutter-audit/compare/v0.3.0...v0.3.1) (2026-03-08)
+
+
+### Bug Fixes
+
+* update CONTRIBUTING with monorepo-aware descriptions ([6d5f0c0](https://github.com/tekne-studio/flutter-audit/commit/6d5f0c08fe86d86e628205efe99c23ca07482552))
+
 # [0.3.0](https://github.com/tekne-studio/flutter-audit/compare/v0.2.0...v0.3.0) (2026-03-08)
 
 
