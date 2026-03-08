@@ -62,15 +62,17 @@ export async function runAudit(
       workspaceRoot, token,
     );
     log.appendLine(`[Step 3] lakos DOT exit code: ${dotResult.exitCode}`);
-    if (dotResult.stderr.trim()) {
-      log.appendLine(`[Step 3] lakos DOT stderr: ${dotResult.stderr.trim()}`);
-    }
     if (dotResult.exitCode === 0 && dotResult.stdout.trim()) {
       rawDot = dotResult.stdout;
       fs.writeFileSync(path.join(outputDir, 'audit-graph.dot'), rawDot);
       log.appendLine(`[Step 3] DOT output saved (${rawDot.length} chars)`);
     } else {
-      log.appendLine(`[Step 3] DOT output empty or failed`);
+      const allOutput = (dotResult.stdout + dotResult.stderr).trim();
+      log.appendLine(`[Step 3] lakos DOT FAILED (exit ${dotResult.exitCode})`);
+      if (allOutput) {
+        log.appendLine(`[Step 3] lakos output: ${allOutput}`);
+      }
+      vscode.window.showWarningMessage(`lakos failed (exit ${dotResult.exitCode}). Check the Flutter Audit output for details.`);
     }
 
     progress.report({ message: 'Collecting metrics...', increment: 10 });
@@ -82,15 +84,16 @@ export async function runAudit(
       workspaceRoot, token,
     );
     log.appendLine(`[Step 3] lakos JSON exit code: ${jsonResult.exitCode}`);
-    if (jsonResult.stderr.trim()) {
-      log.appendLine(`[Step 3] lakos JSON stderr: ${jsonResult.stderr.trim()}`);
-    }
     if (jsonResult.exitCode === 0 && jsonResult.stdout.trim()) {
       lakos = JSON.parse(jsonResult.stdout) as LakosOutput;
       fs.writeFileSync(path.join(outputDir, 'audit-deps.json'), jsonResult.stdout);
       log.appendLine(`[Step 3] JSON parsed: ${Object.keys(lakos.nodes).length} nodes, ${lakos.edges.length} edges`);
     } else {
-      log.appendLine(`[Step 3] JSON output empty or failed`);
+      const allOutput = (jsonResult.stdout + jsonResult.stderr).trim();
+      log.appendLine(`[Step 3] lakos JSON FAILED (exit ${jsonResult.exitCode})`);
+      if (allOutput) {
+        log.appendLine(`[Step 3] lakos output: ${allOutput}`);
+      }
     }
   } else {
     progress.report({ message: 'lakos not found, skipping dependency graph...', increment: 25 });
