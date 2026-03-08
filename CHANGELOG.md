@@ -1,3 +1,11 @@
+## [0.3.2](https://github.com/tekne-studio/flutter-audit/compare/v0.3.1...v0.3.2) (2026-03-08)
+
+
+### Bug Fixes
+
+* graph nodes not respecting text size ([b75c82a](https://github.com/tekne-studio/flutter-audit/commit/b75c82abbc98fd86561d177fcf82bc69592949e4))
+* use PAT to bypass branch protection in release workflow ([f1149a1](https://github.com/tekne-studio/flutter-audit/commit/f1149a13fad7ae9bb16a32d648ecb1c1a37829df))
+
 ## [0.3.1](https://github.com/tekne-studio/flutter-audit/compare/v0.3.0...v0.3.1) (2026-03-08)
 
 

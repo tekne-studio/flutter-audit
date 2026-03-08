@@ -2,7 +2,7 @@
   "name": "flutter-audit",
   "displayName": "Flutter Audit",
   "description": "Interactive dependency graph visualization and architecture audit for Flutter/Dart projects",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "publisher": "TekneStudio",
   "license": "MIT",
   "repository": {
